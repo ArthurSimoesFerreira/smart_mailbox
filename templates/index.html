@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Mailbox Manager</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <h1>📬 IoT Mailbox Manager</h1>
+
+        <h2>📦 Active Devices</h2>
+        <ul id="device-list"></ul>
+    </div>
+
+    <script>
+        async function fetchDevices() {
+            const res = await fetch('/devices');
+            const data = await res.json();
+            const list = document.getElementById('device-list');
+            list.innerHTML = '';
+            for (const id in data) {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    🟢 <strong>${id}</strong>: ${data[id].status} (${data[id].distance || 'N/A'} cm)
+                    <button onclick="removeDevice('${id}')">❌ Remove</button>
+                    <button onclick="confirmReceived('${id}')">✅ Mail Received</button>
+                `;
+                list.appendChild(li);
+            }
+        }
+
+        async function removeDevice(id) {
+                await fetch(`/devices/${id}`, {
+                    method: 'DELETE'
+                });
+                fetchDevices();
+            }
+
+            async function confirmReceived(id) {
+                await fetch(`/devices/${id}/command`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ command: "yes" })
+                });
+                alert('Confirmation sent!');
+            }
+
+
+        fetchDevices();
+        setInterval(fetchDevices, 5000);
+    </script>
+</body>
+
+</html>
