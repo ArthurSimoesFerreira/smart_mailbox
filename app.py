@@ -10,10 +10,6 @@ app.config.from_object(config)
 mqtt = Mqtt(app)
 
 @app.route('/')
-def index():
-    return jsonify({"message": "IoT Mailbox API is running!"})
-
-@app.route('/dashboard')
 def dashboard():
     return render_template('index.html')
 
